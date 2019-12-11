@@ -1,0 +1,21 @@
+.upload_base {
+  display: grid;
+  grid-row-gap: 2em;
+  /*grid-template-columns: auto auto;*/
+  grid-template-columns: 35em 35em;
+  padding: 2em;
+}
+
+.product_photo {
+  grid-column-start: 1;
+  grid-column-end: 2;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
+
+.product_input {
+  grid-column-start: 2;
+  grid-column-end: 3;
+  grid-row-start: 1;
+  grid-row-end: 2;
+}
