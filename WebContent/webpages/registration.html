@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>sign up</title>
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="../css/login.css">
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
   </head>
   <body>
@@ -17,19 +17,20 @@
       <form class="" action="registration.jsp" method="post">
         <table>
           <tr>
-            <td>USERNAME</td>
-            <td> <input type="text" name="userid" value=""> </td>
+            <td>ID</td>
+            <td> <input type="text" name="userid" value="" required> </td>
           </tr>
           <tr>
             <td>PASSWORD</td>
-            <td> <input type="text" name="password" value=""> </td>
+            <td> <input type="text" name="password" value="" required> </td>
           </tr>
+          <tr>
             <td>NAME</td>
-            <td>  <input type="text" name="name" value=""> </td>
+            <td>  <input type="text" name="name" value="" required> </td>
           </tr>
           <tr>
             <td>EMAIL</td>
-            <td> <input type="email" name="email" value=""> </td>
+            <td> <input type="email" name="email" value="" required> </td>
           </tr>
           <tr>
             <td>Sign up as..</td>
@@ -40,7 +41,6 @@
           </tr>
         </table><br>
         <button type="submit" name="button">SUBMIT!</button>
-
       </form>
       <br>
 

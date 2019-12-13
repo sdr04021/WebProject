@@ -32,15 +32,14 @@
 	 System.out.println(select_min);
 	 exp_datetime = expiration_date + " " + select_time +":" + select_min + ":00";
  }
- System.out.println("HELLO WROLD");
  try{
 	Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
 	Connection conn = DriverManager
 		.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
 	PreparedStatement pst = conn.prepareStatement(
-			"insert into product(price, phone, prname, sellerid, status, due, place) values ('"
+			"insert into product(price, phone, prname, sellerid, status, due, image, place) values ('"
 	+product_price+"','"+phone_number+"','"+product_name+"','"+test_user+"','"
-			+sell_type+"','"+exp_datetime+"','"+trading_place+"')");
+			+sell_type+"','"+exp_datetime+"','"+image_type+"','"+trading_place+"')");
 	pst.executeUpdate();
 	pst = conn.prepareStatement("select max(prid) from product");
 	ResultSet rs = pst.executeQuery();

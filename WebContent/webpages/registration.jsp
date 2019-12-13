@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8">
     <title>sign up</title>
-    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="../css/login.css">
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
   </head>
   <body>
@@ -17,6 +17,15 @@
 	Class.forName("com.mysql.cj.jdbc.Driver");
 	Connection conn=DriverManager.getConnection("jdbc:mysql://localhost:3306/webproject?"+"user=root&password=root");
 	String sql="insert into user(userid,password,name,class,email)values(?,?,?,?,?)";
+	
+	//Check if new user ID exists
+	PreparedStatement pst = conn.prepareStatement("select userid from user where userid='"+userid+"'");
+	ResultSet rs = pst.executeQuery();
+	if(rs.next()){
+		out.println("<script>alert(\"User ID already exists\");</script>");
+		out.println("<script>history.back();</script>");
+	}
+	
 	PreparedStatement ps=null;
 	ps=conn.prepareStatement(sql);
 	ps.setString(1,userid);
@@ -24,6 +33,8 @@
 	ps.setString(3,name);
 	ps.setString(4,userclass);
 	ps.setString(5,email);
+	ps.executeUpdate();
+	response.sendRedirect("login.html");
 }
 catch(Exception e){
 	out.println("Database error. Contact server manager.");
@@ -39,13 +50,14 @@ catch(Exception e){
       <form class="" action="registration.jsp" method="post">
         <table>
           <tr>
-            <td>USERNAME</td>
+            <td>ID</td>
             <td> <input type="text" name="userid" value=""> </td>
           </tr>
           <tr>
             <td>PASSWORD</td>
             <td> <input type="text" name="password" value=""> </td>
           </tr>
+          <tr>
             <td>NAME</td>
             <td>  <input type="text" name="name" value=""> </td>
           </tr>
