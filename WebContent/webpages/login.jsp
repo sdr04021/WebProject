@@ -40,7 +40,9 @@
 						response.sendRedirect("admin.jsp");
 					}
 					else if(userclass.equals("seller")){
-						
+						session.setAttribute("userid",userid);
+						session.setAttribute("class","seller");
+						response.sendRedirect("sellerlist.jsp");
 					}
 					else if(userclass.equals("buyer")){
 						
