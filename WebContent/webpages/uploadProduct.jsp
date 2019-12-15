@@ -28,7 +28,7 @@ if(userclass == null || !userclass.equals("seller")){
   <!--Navigation Bar-->
   <div class="container">
     <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark shadow-sm p-3 mb-5">
-      <span class="navbar-brand mb-0 h1">Flea Market</span>
+      <span class="navbar-brand mb-0 h1">SKKU Flea Market</span>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -42,7 +42,7 @@ if(userclass == null || !userclass.equals("seller")){
           </li>
         </ul>
         <div class="flex-shrink-1 flex-grow-0 order-last">
-          <button type="button" class="btn btn-outline-light" name="button" onClick="location.href='https://www.naver.com'">Log out</button>
+          <button type="button" class="btn btn-outline-light" name="button" onClick="location.href='logout.jsp'">Log out</button>
         </div>
       </div>
     </nav>

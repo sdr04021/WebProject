@@ -45,7 +45,9 @@
 						response.sendRedirect("sellerlist.jsp");
 					}
 					else if(userclass.equals("buyer")){
-						
+						session.setAttribute("userid",userid);
+						session.setAttribute("class","buyer");
+						response.sendRedirect("search.jsp");
 					}
 					else out.println("Unknown error");
 				}

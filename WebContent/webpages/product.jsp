@@ -11,6 +11,7 @@ if(userclass == null){
 	response.sendRedirect("login.jsp");
 }
 int prid = Integer.parseInt((String)request.getParameter("prid"));
+boolean wish = false; // is this product in wish list of buyer?
 %>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -27,7 +28,7 @@ int prid = Integer.parseInt((String)request.getParameter("prid"));
   <!--Navigation Bar-->
   <div class="container">
     <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-dark shadow-sm p-3 mb-5">
-      <span class="navbar-brand mb-0 h1">Flea Market</span>
+      <span class="navbar-brand mb-0 h1">SKKU Flea Market</span>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -38,12 +39,18 @@ int prid = Integer.parseInt((String)request.getParameter("prid"));
           	if(userclass.equals("seller")){
           		out.println("<a class=\"nav-link\" href=\"sellerlist.jsp\">Product List<span class=\"sr-only\">(current)</span></a>");
           	}
+          	else if(userclass.equals("buyer")){
+          		out.println("<a class=\"nav-link\" href=\"search.jsp\">Search<span class=\"sr-only\">(current)</span></a>");
+          	}
           	%>
           </li>
           <li class="nav-item">
           	<%
           	if(userclass.equals("seller")){
           		out.println("<a class=\"nav-link\" href=\"uploadProduct.jsp\">Register Product</a>");
+          	}
+          	else if(userclass.equals("buyer")){
+          		out.println("<a class=\"nav-link\" href=\"mypage.jsp\">Mypage</a>");
           	}
           	%>
           </li>
@@ -81,6 +88,12 @@ int prid = Integer.parseInt((String)request.getParameter("prid"));
 		img_src = img_src + prid + image_type; 
     }
     else out.println("ERROR");
+    
+    if(userclass.equals("buyer")){
+        pst = conn.prepareStatement("select * from wishlist where userid='"+userid+"' and prid="+prid+"");
+        rs = pst.executeQuery();
+        if(rs.next()) wish = true;
+    }
   } catch(Exception e){
 	  System.out.println(e);
   }
@@ -117,10 +130,11 @@ int prid = Integer.parseInt((String)request.getParameter("prid"));
             <div class="col-sm">
             <% 
           		if(userid.equals(sellerid)){
-          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
+          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
           		}
           		else if(userclass.equals("buyer")){
-          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-dark\" style=\"width:100%\">Put wish list</button>");
+          			if(wish) out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-secondary\" style=\"width:100%\" onClick=\"location.href='deletewishlist.jsp?prid="+prid+"'\">Delete from wish list</button>");
+          			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-secondary\" style=\"width:100%\" onClick=\"location.href='putwishlist.jsp?prid="+prid+"'\">Put wish list</button>");
           		}
             %>
             </div>
