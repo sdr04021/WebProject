@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR" import="java.sql.*"%>
+    pageEncoding="EUC-KR" import="java.sql.*" import="java.util.*" import="java.text.*"%>
 <%
 //Check if user is seller or buyer
 if(request.getSession(false) == null){
@@ -12,6 +12,8 @@ if(userclass == null){
 }
 int prid = Integer.parseInt((String)request.getParameter("prid"));
 boolean wish = false; // is this product in wish list of buyer?
+boolean isAuction = false; //is auction?
+boolean isPurchased = false; //is purchased?
 %>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -71,6 +73,7 @@ boolean wish = false; // is this product in wish list of buyer?
   String status = "";
   String image_type = "";
   String place = "";
+  String due="";
   try{
     Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
     Connection conn = DriverManager
@@ -85,7 +88,12 @@ boolean wish = false; // is this product in wish list of buyer?
 		status = rs.getString("status");
 		image_type = rs.getString("image");
 		place = rs.getString("place");
-		img_src = img_src + prid + image_type; 
+		img_src = img_src + prid + image_type;
+		if(status.equals("auction")){
+			isAuction = true;
+			due = rs.getString("due");
+		}
+		else if(status.equals("purchased")) isPurchased = true;
     }
     else out.println("ERROR");
     
@@ -112,8 +120,16 @@ boolean wish = false; // is this product in wish list of buyer?
                 <th class="table-light">Product Name</th>
                 <td><%=prname %></td>
               </tr>
+              <%
+              	if(isAuction){
+              		out.println("<tr>");
+              		out.println("<th class=\"table-light\">Time Left</th>");
+              		out.println("<td class=\"font-weight-bold\" id=\"timeleft\"></td>");
+              		out.println("</tr>");
+              	}
+              %>
               <tr>
-                <th class="table-light">Price</th>
+                <th class="table-light"><%if(isAuction) out.println("Current Price"); else out.println("Price");%></th>
                 <td><%=price %></td>
               </tr>
               <tr>
@@ -128,30 +144,81 @@ boolean wish = false; // is this product in wish list of buyer?
           </table>
           <div class="row">
             <div class="col-sm">
-            <% 
-          		if(userid.equals(sellerid)){
-          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
-          		}
-          		else if(userclass.equals("buyer")){
-          			if(wish) out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-secondary\" style=\"width:100%\" onClick=\"location.href='deletewishlist.jsp?prid="+prid+"'\">Delete from wish list</button>");
-          			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-secondary\" style=\"width:100%\" onClick=\"location.href='putwishlist.jsp?prid="+prid+"'\">Put wish list</button>");
-          		}
+            <%
+            	if(!isPurchased){
+              		if(userid.equals(sellerid)){
+              			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
+              		}
+              		else if(userclass.equals("buyer")){
+              			if(wish) out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-info\" style=\"width:100%\" onClick=\"location.href='deletewishlist.jsp?prid="+prid+"'\">Delete from wish list</button>");
+              			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-info\" style=\"width:100%\" onClick=\"location.href='putwishlist.jsp?prid="+prid+"'\">Put wish list</button>");
+              		}
+            	}
             %>
             </div>
             <div class="col-sm">
             <% 
-          		if(userid.equals(sellerid)){
-          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-danger\" style=\"width:100%\" onClick=\"location.href='cancelproduct.jsp?prid="+prid+"'\">Cancel</button>");
-          		}
-          		else if(userclass.equals("buyer")){
-          			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-dark\" style=\"width:100%\">Buy</button>");
-          		}
+            	if(!isPurchased){
+              		if(userid.equals(sellerid)){
+              			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-danger\" style=\"width:100%\" onClick=\"location.href='cancelproduct.jsp?prid="+prid+"'\">Cancel</button>");
+              		}
+              		else if(userclass.equals("buyer")){
+              			if(isAuction){
+              				out.println("<form class=\"form-inline\" action=\"\" method=\"post\">");
+              				out.println("<div class=\"input-group input-group-lg\">");
+              				out.println("<input type=\"number\" class=\"form-control\" name=\"price\" placeholder=\"Price\" min="+price+" max=\"2147483647\" required>");
+              				out.println("<div class=\"input-group-append\">");
+              				out.println("<button type=\"submit\" id=\"bid_btn\" class=\"btn btn-primary\" name=\"button\">Bid</button>");
+              				out.println("</div>");
+              				out.println("</div>");
+              				out.println("</form>");
+              			}
+              			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='purchase.jsp?prid="+prid+"'\">Buy</button>");
+              		}
+            	}
             %>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <script>
+    <%
+    if(isAuction){
+    	String due_datetime[] = due.split(" ");
+    	String due_date[] = due_datetime[0].split("-");
+    	String due_time[] = due_datetime[1].split(":");
+    	due_date[1] = Integer.toString(Integer.parseInt(due_date[1]) - 1);
+    	out.println("var timeleft = document.getElementById(\"timeleft\");");
+    	out.println("var bidbutton = document.getElementById(\"bid_btn\");");
+    	out.println("function clock(){");
+    	out.println("var dueDate = new Date("+due_date[0]+","+due_date[1]+","+due_date[2]+","+due_time[0]+","+due_time[1]+","+due_time[2]+");");
+    	out.println("var curDate = new Date();");
+    	out.println("var sec = 1000;");
+    	out.println("var min = sec * 60;");
+    	out.println("var hour = min * 60;");
+    	out.println("if ((dueDate.getTime() - curDate.getTime()) > 0) {");
+    	out.println("var gap = dueDate.getTime() - curDate.getTime();");
+    	out.println("var left_hour = Math.floor(gap / hour);");
+    	out.println("var left_min = Math.floor(((gap % hour) / min));");
+    	out.println("var left_sec = Math.floor((((gap % hour) % min) / sec));");
+    	out.println("if(left_hour<10) left_hour = \"0\" + String(left_hour);");
+    	out.println("if(left_min<10) left_min = \"0\" + String(left_min);");
+    	out.println("if(left_sec<10) left_sec = \"0\" + String(left_sec);");
+    	out.println("timeleft.innerText = left_hour + \":\" + left_min + \":\" + left_sec;");
+    	out.println("} else {");
+    	out.println("timeleft.innerText = \"Expired\";");
+    	out.println("bidbutton.disabled = true;");
+    	out.println("}");
+    	out.println("}");
+    	out.println("function update_clock() {");
+    	out.println("clock();");
+    	out.println("setInterval(clock, 1000);");
+    	out.println("}");
+    	out.println("update_clock();");
+    }
+    %>           
+    </script>
   </div>
   
   <!--Bootstrap js-->

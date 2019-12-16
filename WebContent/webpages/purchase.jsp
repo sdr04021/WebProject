@@ -15,11 +15,18 @@ try{
   	Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
   	Connection conn = DriverManager
   		.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
-	//Delete Product
-	PreparedStatement pst = conn.prepareStatement("insert into wishlist(userid, prid) values ('"+userid+"',"+prid+")");
+  	
+	//new purchase info
+	PreparedStatement pst = conn.prepareStatement("insert into purchase(userid, prid) values ('"+userid+"',"+prid+")");
 	pst.executeUpdate();
-	//response.sendRedirect("product.jsp?prid="+Integer.toString(prid)+"");
-	out.println("<script>location.href = document.referrer; history.back();</script>");
+	//delete purchased product form users wishlist
+	pst = conn.prepareStatement("delete from wishlist where prid='"+prid+"'");
+	pst.executeUpdate();
+	//change product status to purchased
+	pst = conn.prepareStatement("update product set status = \"purchased\" where prid="+prid+"");
+	pst.executeUpdate();
+	response.sendRedirect("mypage.jsp");
+	//out.println("<script>location.href = document.referrer; history.back();</script>");
 }catch(Exception e){
 	System.out.println(e);
 }

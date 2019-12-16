@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR" import="java.sql.*"%>
+    pageEncoding="EUC-KR" import="java.sql.*" import="java.util.*" import="java.text.*"%>
 <%
 //Check if user is seller
 if(request.getSession(false) == null){
@@ -10,6 +10,8 @@ String userid = (String)session.getAttribute("userid");
 if(userclass == null || !userclass.equals("seller")){
 	response.sendRedirect("login.jsp");
 }
+SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
+String today = myFormat.format(new java.util.Date()); 
 %>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -101,7 +103,7 @@ if(userclass == null || !userclass.equals("seller")){
           <br>
           <div class="auction_input" id="auction_input">
             <label for="expiration_date" id="exp_label">Expiration Date:</label>
-            <input type="date" class="form-control" name="expiration_date" id="exp_date">
+            <input type="date" class="form-control" name="expiration_date" id="exp_date" value=<%=today%>>
             <br>
             <label for="select_time">Expiration Time:</label>
             <select class="custom-select custom-select-sm" style="width:100px" name="select_time">
@@ -128,7 +130,7 @@ if(userclass == null || !userclass.equals("seller")){
               <option value="20">20</option>
               <option value="21">21</option>
               <option value="22">22</option>
-              <option value="23">23</option>
+              <option value="23" selected>23</option>
             </select>
             :
             <select class="custom-select custom-select-sm" style="width:100px" name="select_min">
@@ -151,7 +153,7 @@ if(userclass == null || !userclass.equals("seller")){
               <option value="48">48</option><option value="49">49</option><option value="50">50</option>
               <option value="51">51</option><option value="52">52</option><option value="53">53</option>
               <option value="54">54</option><option value="55">55</option><option value="56">56</option>
-              <option value="57">57</option><option value="58">58</option><option value="59">59</option>
+              <option value="57">57</option><option value="58">58</option><option value="59" selected>59</option>
             </select>
           </div>
           <script type="text/javascript">

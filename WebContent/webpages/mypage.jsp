@@ -77,13 +77,7 @@ if(userclass == null || !userclass.equals("buyer")){
             		}
             		out.println("<div class=\"card bg-white border-white shadow\">");
             		out.println("<div class=\"d-flex flex-grow-1 align-items-center\">");
-            		out.println("<img src=\""+img_src+"\" class=\"card-img-top\" alt=\"\">");
-            		out.println("</div>");
-            		out.println("<div class=\"card-body d-flex flex-shrink-1 flex-grow-0 order-last flex-column-reverse\">");
-            		out.println("<a href=\"product.jsp?prid="+Integer.toString(prid)+"\" class=\"btn btn-dark stretched-link\" style=\"width:100%\">"+price+"</a>");
-            		out.println("<div>");
-            		out.println("<h5 class=\"card-title\">"+prname+"<span class=\"badge badge-pill badge-primary ml-1\">"+seller+"</span></h5>");
-            		out.println("</div>");
+            		out.println("<a href=\"product.jsp?prid="+Integer.toString(prid)+"\" class=\"stretched-link\"\"><img src=\""+img_src+"\" class=\"card-img-top\" alt=\"\"></a>");
             		out.println("</div>");
             		out.println("</div>");
             		if((count%5)==4){
@@ -98,28 +92,57 @@ if(userclass == null || !userclass.equals("buyer")){
             }
             count++;
         }
+        out.println("<br>");
+        //load purchased info
+        out.println("<h3 class=\"mb-4\">Purchased</h3>");
+        pst = conn.prepareStatement("select * from purchase where userid ='"+userid+"'");
+        rs = pst.executeQuery();
+        
+        count = 0;
+        while(true){
+        	if(rs.next()){
+                int prid = rs.getInt("prid");
+                pst = conn.prepareStatement("select * from product where prid="+prid+"");
+                ResultSet product = pst.executeQuery();
+                
+                if(product.next()){
+             		String prname = product.getString("prname");
+             		String price = product.getString("price");
+             		String img_type = product.getString("image");
+             		String img_src = "../images/" + Integer.toString(prid) + img_type;
+             		String seller = product.getString("sellerid");
+             		
+                		if((count%5)==0){
+             			out.println("<div class=\"card-deck mb-3 mx-auto\">");
+             		}
+             		out.println("<div class=\"card bg-white border-white shadow\">");
+             		out.println("<div class=\"d-flex flex-grow-1 align-items-center\">");
+             		out.println("<img src=\""+img_src+"\" class=\"card-img-top\" alt=\"\">");
+             		out.println("</div>");
+             		out.println("<div class=\"card-body d-flex flex-shrink-1 flex-grow-0 order-last flex-column-reverse\">");
+             		out.println("<a href=\"product.jsp?prid="+Integer.toString(prid)+"\" class=\"btn btn-dark stretched-link\" style=\"width:100%\">"+price+"</a>");
+             		out.println("<div>");
+             		out.println("<h5 class=\"card-title\">"+prname+"<span class=\"badge badge-pill badge-primary ml-1\">"+seller+"</span></h5>");
+             		out.println("</div>");
+             		out.println("</div>");
+             		out.println("</div>");
+             		if((count%5)==4){
+             			out.println("</div>");
+             		}
+                 }
+        	}
+        	else{
+               	if(count==0) out.println("<h5 class = \"text-secondary\">No Products</h5>");
+               	if(((count%5)!=4)&&(count!=0)) out.println("</div>");
+            	break;
+        	}
+        	count++;
+        }
+       
     } catch(Exception e){
     	System.out.println(e);
     }
     %>
-      <br>
-      <h3 class="mb-4">Purchased</h3>
-      <div class="card-deck mb-3 mx-auto">
-        <div class="card bg-white border-white shadow">
-          <div class="d-flex flex-grow-1 align-items-center">
-            <img src="" class="card-img-top" alt="...">
-          </div>
-          <div class="card-body d-flex flex-shrink-1 flex-grow-0 order-last flex-column-reverse">
-            <a href="#" class="btn btn-dark stretched-link" style="width:100%">0</a>
-            <div>
-              <h5 class="card-title">E<span class="badge badge-pill badge-primary mx-1">Eve</span></h5>
-            </div>
-            <!--<p class="card-text">201546</p>-->
-          </div>
-        </div>
-      </div>
-      
-      <!--  -->
     </div>
   </div>
 

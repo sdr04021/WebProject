@@ -54,7 +54,7 @@ if(userclass == null || !userclass.equals("seller")){
         <tr>
           <th scope="col">Name</th>
           <th scope="col">Current Price</th>
-          <th scope="col">Wish</th>
+          <th scope="col">Wishes</th>
           <th scope="col">Status</th>
           <th scope="col">History</th>
           <th scope="col">Product Page</th>
@@ -71,14 +71,18 @@ if(userclass == null || !userclass.equals("seller")){
           	while(true){
           		if(rs.next()){
           			int prid = rs.getInt("prid");
+          			int wishes = 0;
           			String price = rs.getString("price");
           			String phone = rs.getString("phone");
           			String prname = rs.getString("prname");
           			String status = rs.getString("status");
+          			pst = conn.prepareStatement("select count(*) from wishlist where prid="+prid+"");
+          			ResultSet rst = pst.executeQuery();
+          			if(rst.next()) wishes = rst.getInt("count(*)");
           			out.println("<tr>");
           			out.println("<td>"+prname+"</td>");
           			out.println("<td>"+price+"</td>");
-          			out.println("<td>not yet</td>");
+          			out.println("<td>"+wishes+"</td>");
           			out.println("<td>"+status+"</td>");
           			out.println("<td><button type=\"button\" class=\"btn btn-secondary btn-sm\" data-toggle=\"modal\" data-target=\"#exampleModal\" name=\"button\">Watch</button></td>");
           			out.println("<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">");

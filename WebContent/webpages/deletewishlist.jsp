@@ -18,7 +18,8 @@ try{
 	//Delete Product
 	PreparedStatement pst = conn.prepareStatement("delete from wishlist where userid='"+userid+"' and prid="+prid+"");
 	pst.executeUpdate();
-	response.sendRedirect("product.jsp?prid="+Integer.toString(prid)+"");
+	//response.sendRedirect("product.jsp?prid="+Integer.toString(prid)+"");
+	out.println("<script>location.href = document.referrer; history.back();</script>");
 }catch(Exception e){
 	System.out.println(e);
 }

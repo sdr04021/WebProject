@@ -49,6 +49,7 @@ try{
 	if(image_name!=null){
 		image_type = image_name.substring(image_name.indexOf('.'), image_name.length());
 		pst = conn.prepareStatement("update product set image='"+image_name+"' where prid="+prid+"");
+		pst.executeUpdate();
 		String new_name = Integer.toString(prid)+image_type;
 		File oldFile = new File(path.toString() + "/" + image_name);
 		File newFile = new File(path.toString() + "/" + new_name);

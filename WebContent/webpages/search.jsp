@@ -103,6 +103,8 @@ if(max_price==null) max_price="";
         while(true){
         	if(rs.next()){
         		int prid = rs.getInt("prid");
+        		String status = rs.getString("status");
+        		if(status.equals("purchased")) continue;
         		String prname = rs.getString("prname");
         		String price = rs.getString("price");
         		String img_type = rs.getString("image");
