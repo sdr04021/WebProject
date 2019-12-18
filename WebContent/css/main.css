@@ -1,6 +1,21 @@
+#myInput {
+  background-image: url('/css/searchicon.png');
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 100%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+
+
 .msr_search_06 form{
   height:32px;
   width:500px;
+  margin-top: 3px;
+  margin-bottom: 3px;
   position:relative;
 }
 .msr_search_06 form input[type=text]{
@@ -8,9 +23,9 @@
   height:32px;
   padding:4px 40px 4px 8px;
   border:none;
-  -webkit-border-radius:32px;
-     -moz-border-radius:32px;
-          border-radius:32px;
+  -webkit-border-radius:0px;
+     -moz-border-radius:0px;
+          border-radius:0px;
   -webkit-appearance: none;
   outline: 0;
   -webkit-box-sizing: border-box;
@@ -34,10 +49,10 @@
   height:32px;
   color:#fff;
   border:none;
-  -webkit-border-radius:16px;
-     -moz-border-radius:16px;
-          border-radius:16px;
-  background:#1B73BA;
+  -webkit-border-radius:0px;
+     -moz-border-radius:0px;
+          border-radius:0px;
+  background:#000000;
   display:inline-block;
   -webkit-appearance: none;
   outline: 0;

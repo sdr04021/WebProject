@@ -18,8 +18,8 @@
     <div class="signin">
 
       <form class="" action="login.jsp" method="post">
-        <label for="id">USERID</label> <label for="pswd">PASSWORD</label> <br>
-        <input type="text" name="userid" value="">
+        <label for="userid">USERID</label> <label for="password">PASSWORD</label> <br>
+        <input Id="userid" type="text" name="userid" value="">
         <input type="password" name="password" value="">
         <p style="color:red">
         <% try{
