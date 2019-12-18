@@ -21,12 +21,13 @@ if(min_price==null) min_price="";
 String max_price = (String)request.getParameter("max");
 if(max_price==null) max_price="";
 %>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>Search Products</title>
   <link rel="stylesheet" href="../css/navbarfix.css">
   <!--Bootstrap CSS-->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -104,7 +105,7 @@ if(max_price==null) max_price="";
         	if(rs.next()){
         		int prid = rs.getInt("prid");
         		String status = rs.getString("status");
-        		if(status.equals("purchased")) continue;
+        		if(status.equals("purchased")||status.equals("expired")) continue;
         		String prname = rs.getString("prname");
         		String price = rs.getString("price");
         		String img_type = rs.getString("image");
@@ -141,6 +142,12 @@ if(max_price==null) max_price="";
       %>
     </div>
   </div>
+
+  <!-- footer -->
+  <footer class="page-footer font-smallpt-4">
+    <hr>
+    <div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  </footer>
 
   <!--Bootstrap js-->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

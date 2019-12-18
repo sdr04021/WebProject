@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR" import="java.sql.*"%>
+    pageEncoding="EUC-KR" import="java.sql.*" import="java.util.*" import="java.text.*"%>
 <%
 //Check if user is seller
 if(request.getSession(false) == null){
@@ -11,6 +11,7 @@ if(userclass == null || !userclass.equals("seller")){
 	response.sendRedirect("login.jsp");
 }
 %>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
@@ -66,10 +67,52 @@ if(userclass == null || !userclass.equals("seller")){
           	Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
           	Connection conn = DriverManager
           		.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
-          	PreparedStatement pst = conn.prepareStatement("select * from product where sellerid ='"+userid+"'");
-          	ResultSet rs = pst.executeQuery();
+          	
+            //------------------------Auction Purchase Updater---------------------------------------
+            SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date today = new java.util.Date();
+            PreparedStatement pst = conn.prepareStatement("select * from product where status = 'auction'");
+            ResultSet rs = pst.executeQuery();
+            while(true){
+            	if(rs.next()){
+            		java.util.Date due = myFormat.parse(rs.getString("due"));
+            		long gap = due.getTime() - today.getTime();
+            		if(gap<0){
+            			int prid = rs.getInt("prid");
+            			pst = conn.prepareStatement("select * from history where prid="+prid+" order by price desc");
+            			ResultSet rs_2 = pst.executeQuery();
+            			if(rs_2.next()){ // change product status to purchased
+            				String maxBidder = rs_2.getString("userid");
+            				//new purchase info
+            				pst = conn.prepareStatement("insert into purchase(userid, prid) values ('"+maxBidder+"',"+prid+")");
+            				pst.executeUpdate();
+            				//delete purchased product form users' wishlist
+            				pst = conn.prepareStatement("delete from wishlist where prid='"+prid+"'");
+            				pst.executeUpdate();
+            				//change product status to purchased
+            				pst = conn.prepareStatement("update product set status = \"purchased\" where prid="+prid+"");
+            				pst.executeUpdate();
+            			}
+            			else{
+            				//delete expired product form users' wishlist
+            				PreparedStatement ps = conn.prepareStatement("delete from wishlist where prid='"+prid+"'");
+            				ps.executeUpdate();
+            				// change product status to expired
+            				ps = conn.prepareStatement("update product set status = \"expired\" where prid="+prid+"");
+            				ps.executeUpdate();
+            			}
+            		}
+            	}
+            	else break;
+            }
+            //-------------------------------------------------------------------------------------------
+          	
+          	pst = conn.prepareStatement("select * from product where sellerid ='"+userid+"'");
+          	rs = pst.executeQuery();
+          	int count = 1;
           	while(true){
           		if(rs.next()){
+          			//load product information
           			int prid = rs.getInt("prid");
           			int wishes = 0;
           			String price = rs.getString("price");
@@ -84,18 +127,30 @@ if(userclass == null || !userclass.equals("seller")){
           			out.println("<td>"+price+"</td>");
           			out.println("<td>"+wishes+"</td>");
           			out.println("<td>"+status+"</td>");
-          			out.println("<td><button type=\"button\" class=\"btn btn-secondary btn-sm\" data-toggle=\"modal\" data-target=\"#exampleModal\" name=\"button\">Watch</button></td>");
-          			out.println("<div class=\"modal fade\" id=\"exampleModal\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel\" aria-hidden=\"true\">");
+          			out.println("<td><button type=\"button\" class=\"btn btn-info btn-sm\" data-toggle=\"modal\" data-target=\"#exampleModal"+count+"\" name=\"button\">Watch</button></td>");
+          			out.println("<div class=\"modal fade\" id=\"exampleModal"+count+"\" tabindex=\"-1\" role=\"dialog\" aria-labelledby=\"exampleModalLabel"+count+"\" aria-hidden=\"true\">");
           			out.println("<div class=\"modal-dialog\" role=\"document\">");
           			out.println("<div class=\"modal-content\">");
           			out.println("<div class=\"modal-header\">");
-          			out.println("<h5 class=\"modal-title\" id=\"exampleModalLabel\">History</h5>");
+          			out.println("<h5 class=\"modal-title\" id=\"exampleModalLabel"+count+"\">History</h5>");
           			out.println("<button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-label=\"Close\">");
           			out.println("<span aria-hidden=\"true\">&times;</span>");
           			out.println("</button>");
           			out.println("</div>");
           			out.println("<div class=\"modal-body\">");
-          			out.println("No history");
+          			//load history of auction product
+          			pst = conn.prepareStatement("select * from history where prid="+prid+"");
+          			ResultSet rs_2 = pst.executeQuery();
+          			out.println("<ul class=\"list-group\">");
+          			while(true){
+              			if(rs_2.next()){
+              				String bidder = rs_2.getString("userid");
+              				String bid_price = rs_2.getString("price");
+              				out.println("<li class=\"list-group-item\"><b>"+bidder+"</b> : "+bid_price+"</li>");
+              			}
+              			else break;
+          			}
+          			out.println("</ul>");
           			out.println("</div>");
           			out.println("<div class=\"modal-footer\">");
           			out.println("<button type=\"button\" class=\"btn btn-secondary\" data-dismiss=\"modal\">Close</button>");
@@ -107,6 +162,7 @@ if(userclass == null || !userclass.equals("seller")){
           			out.println("</tr>");
           		}
           		else break;
+              	count++;
           	}
       	} catch(Exception e){
       		System.out.println(e);
@@ -115,9 +171,12 @@ if(userclass == null || !userclass.equals("seller")){
       </tbody>
     </table>
   </div>
-
-
-
+  
+  <!-- footer -->
+  <footer class="page-footer font-smallpt-4">
+  	<hr>
+  	<div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  </footer>
 
   <!--Bootstrap js-->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

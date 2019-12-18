@@ -16,11 +16,11 @@
 %>
 
 <%
+	//load product information from database
 	int price = 0;
 	String path = "../images/";
 	String phone = "";
 	String prname = "";
-	//String sellerid = "";
 	String status = "";
 	String due = "";
 	String dues[] = null;
@@ -28,6 +28,7 @@
 	String image_type = "";
 	String place = "";
 	boolean isAuction = false;
+	boolean hasHistory = false;
 	try {
 		Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
 		Connection conn = DriverManager
@@ -49,16 +50,20 @@
 				times = dues[1].split(":");
 			}
 		}
+		pst = conn.prepareStatement("select * from history where prid="+prid+"");
+		rs = pst.executeQuery();
+		if(rs.next()) hasHistory = true;
 	} catch (Exception e) {
 		System.out.println(e);
 	}
 %>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
 <meta charset="utf-8">
-<title></title>
+<title>Modify Product Information</title>
 <link rel="stylesheet" href="../css/navbarfix.css">
 <!--Bootstrap CSS-->
 <link rel="stylesheet"
@@ -132,7 +137,8 @@
 						value="<%=prname%>">
 					<br>
 					<label for="product_price">Price:</label>
-					<input type="number" class="form-control" name="product_price" id="product_price" min="0" max="2147483647" required value="<%=price%>">
+					<input type="number" class="form-control" name="product_price" id="product_price" min="0" max="2147483647" required 
+						value="<%=price%>" <%if(hasHistory) out.println("readonly"); %>>
 					<br>
 					<label for="phone_number">Phone Number:</label>
 					<input type="number" class="form-control" name="phone_number" id="phone_number" maxlength="34" required value="<%=phone%>">
@@ -141,12 +147,12 @@
 					<input type="text" class="form-control" name="trading_place" id="trading_place" maxlength="45" required value="<%=place%>">
 					<br>
 					<div class="form-check form-check-inline">
-						<input type="radio" name="sell_type" id="sell_type_1" class="form-check-input" value="fleaMarket" onclick="is_not_auction()"
+						<input type="radio" name="sell_type" id="sell_type_1" class="form-check-input" value="fleaMarket" onclick="return(false);"
 							<%if (!status.equals("auction")) out.println("checked");%>>
 						<label class="form-check-label" for="sell_type_1">Flea Market</label>
 					</div>
 					<div class="form-check form-check-inline">
-						<input type="radio" name="sell_type" id="sell_type_2" class="form-check-input" value="auction" onclick="is_auction()"
+						<input type="radio" name="sell_type" id="sell_type_2" class="form-check-input" value="auction" onclick="return(false);"
 							<%if (status.equals("auction")) { out.println("checked"); }%>>
 						<label class="form-check-label" for="sell_type_2">Auction</label>
 					</div>
@@ -214,7 +220,13 @@
 		</form>
 	</div>
 	
-	<!--js-->
+	<!-- footer -->
+	<footer class="page-footer font-smallpt-4">
+    <hr>
+    <div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  	</footer>
+	
+	<!--Bootstrap js-->
   	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

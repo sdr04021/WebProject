@@ -13,12 +13,13 @@ if(userclass == null || !userclass.equals("seller")){
 SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd");
 String today = myFormat.format(new java.util.Date()); 
 %>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>Register Product</title>
   <script type="text/javascript" src="uploadProduct.js">
   </script>
   <link rel="stylesheet" href="../css/navbarfix.css">
@@ -83,7 +84,7 @@ String today = myFormat.format(new java.util.Date());
           <input type="text" class="form-control" name="product_name" id="product_name" maxlength="45" required>
           <br>
           <label for="product_price">Price:</label>
-          <input type="number" class="form-control" name="product_price" id="product_price" min="0" max="2147483647" required>
+          <input type="number" class="form-control" name="product_price" id="product_price" min="0" max="2147483647" value="0" required>
           <br>
           <label for="phone_number">Phone Number:</label>
           <input type="number" class="form-control" name="phone_number" id="phone_number" maxlength="45" required>
@@ -175,7 +176,13 @@ String today = myFormat.format(new java.util.Date());
     </form>
   </div>
   
-  <!--js-->
+  <!-- footer -->
+   <footer class="page-footer font-smallpt-4">
+    <hr>
+    <div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  </footer>
+  
+  <!--Bootstrap js-->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>

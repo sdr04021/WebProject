@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=EUC-KR"
-    pageEncoding="EUC-KR" import="java.sql.*"%>
+    pageEncoding="EUC-KR" import="java.sql.*" import="java.util.*" import="java.text.*"%>
 <% 
 //Check if user is buyer
 if(request.getSession(false) == null){
@@ -17,7 +17,7 @@ if(userclass == null || !userclass.equals("buyer")){
 
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>My Page</title>
   <link rel="stylesheet" href="../css/navbarfix.css">
   <!--Bootstrap CSS-->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -48,16 +48,58 @@ if(userclass == null || !userclass.equals("buyer")){
   </div>
 
   <div class="container">
-    <div class="jumbotron pt-3 bg-light">
+    <div class="jumbotron pt-3 pb-3 mb-1 bg-light">
     <%
     try{
         Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
         Connection conn = DriverManager
         	.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
         
-    	out.println("<h3 class=\"mb-4\">Wish List</h3>");
-        PreparedStatement pst = conn.prepareStatement("select * from wishlist where userid ='"+userid+"'");
+        //------------------------Auction Purchase Updater---------------------------------------
+        SimpleDateFormat myFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        java.util.Date today = new java.util.Date();
+        PreparedStatement pst = conn.prepareStatement("select * from product where status = 'auction'");
         ResultSet rs = pst.executeQuery();
+        while(true){
+        	if(rs.next()){
+        		java.util.Date due = myFormat.parse(rs.getString("due"));
+        		long gap = due.getTime() - today.getTime();
+        		//if(gap<0) System.out.println("passed");
+        		//else System.out.println("not yet");
+        		if(gap<0){
+        			int prid = rs.getInt("prid");
+        			pst = conn.prepareStatement("select * from history where prid="+prid+" order by price desc");
+        			ResultSet rs_2 = pst.executeQuery();
+        			if(rs_2.next()){ // change product status to purchased
+        				String maxBidder = rs_2.getString("userid");
+        				//new purchase info
+        				pst = conn.prepareStatement("insert into purchase(userid, prid) values ('"+maxBidder+"',"+prid+")");
+        				pst.executeUpdate();
+        				//delete purchased product form users wishlist
+        				pst = conn.prepareStatement("delete from wishlist where prid='"+prid+"'");
+        				pst.executeUpdate();
+        				//change product status to purchased
+        				pst = conn.prepareStatement("update product set status = \"purchased\" where prid="+prid+"");
+        				pst.executeUpdate();
+        			}
+        			else{
+        				//delete expired product form users wishlist
+        				PreparedStatement ps = conn.prepareStatement("delete from wishlist where prid='"+prid+"'");
+        				ps.executeUpdate();
+        				// change product status to expired
+        				ps = conn.prepareStatement("update product set status = \"expired\" where prid="+prid+"");
+        				ps.executeUpdate();
+        			}
+        		}
+        	}
+        	else break;
+        }
+        //-------------------------------------------------------------------------------------------
+        
+        //load products in wish list
+    	out.println("<h3 class=\"mb-4\">Wish List</h3>");
+        pst = conn.prepareStatement("select * from wishlist where userid ='"+userid+"'");
+        rs = pst.executeQuery();
         
         int count = 0;
         while(true){
@@ -66,6 +108,8 @@ if(userclass == null || !userclass.equals("buyer")){
                 pst = conn.prepareStatement("select * from product where prid="+prid+"");
                 ResultSet product = pst.executeQuery();
                 if(product.next()){
+            		String status = product.getString("status");
+            		if(status.equals("expired")) continue;
             		String prname = product.getString("prname");
             		String price = product.getString("price");
             		String img_type = product.getString("image");
@@ -93,11 +137,13 @@ if(userclass == null || !userclass.equals("buyer")){
             count++;
         }
         out.println("<br>");
+        
         //load purchased info
         out.println("<h3 class=\"mb-4\">Purchased</h3>");
         pst = conn.prepareStatement("select * from purchase where userid ='"+userid+"'");
         rs = pst.executeQuery();
         
+        int total_price = 0;
         count = 0;
         while(true){
         	if(rs.next()){
@@ -111,8 +157,8 @@ if(userclass == null || !userclass.equals("buyer")){
              		String img_type = product.getString("image");
              		String img_src = "../images/" + Integer.toString(prid) + img_type;
              		String seller = product.getString("sellerid");
-             		
-                		if((count%5)==0){
+             		total_price+=Integer.parseInt(price);
+                	if((count%5)==0){
              			out.println("<div class=\"card-deck mb-3 mx-auto\">");
              		}
              		out.println("<div class=\"card bg-white border-white shadow\">");
@@ -133,7 +179,10 @@ if(userclass == null || !userclass.equals("buyer")){
         	}
         	else{
                	if(count==0) out.println("<h5 class = \"text-secondary\">No Products</h5>");
-               	if(((count%5)!=4)&&(count!=0)) out.println("</div>");
+               	if(((count%5)!=4)&&(count!=0)) {
+               		out.println("<div class=\"container mt-3\"><h5>Total: "+total_price+"</h5></div>");
+               		out.println("</div>");
+               	}
             	break;
         	}
         	count++;
@@ -145,6 +194,12 @@ if(userclass == null || !userclass.equals("buyer")){
     %>
     </div>
   </div>
+
+  <!-- footer -->
+  <footer class="page-footer font-smallpt-4">
+    <hr>
+    <div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  </footer>
 
   <!--Bootstrap js-->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>

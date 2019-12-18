@@ -14,13 +14,15 @@ int prid = Integer.parseInt((String)request.getParameter("prid"));
 boolean wish = false; // is this product in wish list of buyer?
 boolean isAuction = false; //is auction?
 boolean isPurchased = false; //is purchased?
+boolean isExpired = false; //is expired? (auction)
 %>
+
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
   <meta charset="utf-8">
-  <title></title>
+  <title>Product</title>
   <link rel="stylesheet" href="../css/navbarfix.css">
   <!--Bootstrap CSS-->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -74,13 +76,15 @@ boolean isPurchased = false; //is purchased?
   String image_type = "";
   String place = "";
   String due="";
+  String bidName="";
+  String maxBidder="";
   try{
     Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
     Connection conn = DriverManager
     	.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
     PreparedStatement pst = conn.prepareStatement("select * from product where prid ="+prid+"");
     ResultSet rs = pst.executeQuery();
-    if(rs.next()){
+    if(rs.next()){ //Load product information
 		price = rs.getString("price");
 		phone = rs.getString("phone");
 		prname = rs.getString("prname");
@@ -94,9 +98,18 @@ boolean isPurchased = false; //is purchased?
 			due = rs.getString("due");
 		}
 		else if(status.equals("purchased")) isPurchased = true;
+		else if(status.equals("expired")) isExpired = true;
     }
     else out.println("ERROR");
     
+    //check max bidder of this product
+	pst = conn.prepareStatement("select * from history where prid="+prid+" order by price desc");
+	rs = pst.executeQuery();
+	if(rs.next()){
+		maxBidder = rs.getString("userid");
+	}
+    
+	//check if buyer added this product in wish list
     if(userclass.equals("buyer")){
         pst = conn.prepareStatement("select * from wishlist where userid='"+userid+"' and prid="+prid+"");
         rs = pst.executeQuery();
@@ -108,7 +121,7 @@ boolean isPurchased = false; //is purchased?
   %>
   <!-- Product Information -->
   <div class="container">
-    <div class="jumbotron pt-4 bg-white">
+    <div class="jumbotron pt-4 pb-2 bg-white">
       <div class="row">
         <div class="col-sm">
           <img src="<%=img_src %>" class="img-thumbnail mx-auto d-block" alt="">
@@ -130,7 +143,11 @@ boolean isPurchased = false; //is purchased?
               %>
               <tr>
                 <th class="table-light"><%if(isAuction) out.println("Current Price"); else out.println("Price");%></th>
-                <td><%=price %></td>
+                <td><%=price %>
+                <%
+                if(maxBidder!="") out.println("<span class=\"badge badge-dark\">"+maxBidder+"</span>");
+                %>
+                </td>
               </tr>
               <tr>
                 <th class="table-light">Seller | Phone</th>
@@ -145,28 +162,29 @@ boolean isPurchased = false; //is purchased?
           <div class="row">
             <div class="col-sm">
             <%
-            	if(!isPurchased){
+            	if(!isPurchased&&!isExpired){
               		if(userid.equals(sellerid)){
-              			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
+              			out.println("<button type=\"button\" name=\"button\" id=\"edit_btn\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='modproduct.jsp?prid="+prid+"'\">Edit</button>");
               		}
               		else if(userclass.equals("buyer")){
-              			if(wish) out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-info\" style=\"width:100%\" onClick=\"location.href='deletewishlist.jsp?prid="+prid+"'\">Delete from wish list</button>");
-              			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-outline-info\" style=\"width:100%\" onClick=\"location.href='putwishlist.jsp?prid="+prid+"'\">Put wish list</button>");
+              			if(wish) out.println("<button type=\"button\" id=\"dwish_btn\" name=\"button\" class=\"btn btn-lg btn-info\" style=\"width:100%\" onClick=\"location.href='deletewishlist.jsp?prid="+prid+"'\">Delete from wish list</button>");
+              			else out.println("<button type=\"button\" id=\"pwish_btn\" name=\"button\" class=\"btn btn-lg btn-outline-info\" style=\"width:100%\" onClick=\"location.href='putwishlist.jsp?prid="+prid+"'\">Put wish list</button>");
               		}
             	}
             %>
             </div>
             <div class="col-sm">
             <% 
-            	if(!isPurchased){
+            	if(!isPurchased&&!isExpired){
               		if(userid.equals(sellerid)){
-              			out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-danger\" style=\"width:100%\" onClick=\"location.href='cancelproduct.jsp?prid="+prid+"'\">Cancel</button>");
+              			out.println("<button type=\"button\" name=\"button\" id=\"cancel_btn\" class=\"btn btn-lg btn-danger\" style=\"width:100%\" onClick=\"location.href='cancelproduct.jsp?prid="+prid+"'\">Cancel</button>");
               		}
               		else if(userclass.equals("buyer")){
               			if(isAuction){
-              				out.println("<form class=\"form-inline\" action=\"\" method=\"post\">");
+              				out.println("<form class=\"form-inline\" action=\"bid.jsp?prid="+prid+"\" method=\"post\">");
               				out.println("<div class=\"input-group input-group-lg\">");
-              				out.println("<input type=\"number\" class=\"form-control\" name=\"price\" placeholder=\"Price\" min="+price+" max=\"2147483647\" required>");
+              				String minPrice = Integer.toString(Integer.parseInt(price) + 1);
+              				out.println("<input type=\"number\" class=\"form-control\" name=\"price\" placeholder=\"Price\" min="+minPrice+" max=\"2147483647\" required>");
               				out.println("<div class=\"input-group-append\">");
               				out.println("<button type=\"submit\" id=\"bid_btn\" class=\"btn btn-primary\" name=\"button\">Bid</button>");
               				out.println("</div>");
@@ -176,21 +194,65 @@ boolean isPurchased = false; //is purchased?
               			else out.println("<button type=\"button\" name=\"button\" class=\"btn btn-lg btn-primary\" style=\"width:100%\" onClick=\"location.href='purchase.jsp?prid="+prid+"'\">Buy</button>");
               		}
             	}
+            	else if (isExpired) out.println("<button type=\"button\" name=\"button\" id=\"cancel_btn\" class=\"btn btn-lg btn-danger\" style=\"width:100%\" onClick=\"location.href='cancelproduct.jsp?prid="+prid+"'\">Delete</button>");
             %>
             </div>
           </div>
         </div>
       </div>
+      <!-- Comments -->
+      <div class="row">
+      	<div class="col-sm mt-5">
+      	<h5>Comments</h5>
+      	<table class="table">
+      	  <tbody>
+      	    <%
+      	    try{
+      	   	  Class.forName("com.mysql.cj.jdbc.Driver");
+      	      Connection cconn = DriverManager
+      	        	.getConnection("jdbc:mysql://localhost:3306/webproject?" + "user=root&password=root");
+      	        PreparedStatement cpst = cconn.prepareStatement("select * from comment where prid ="+prid+"");
+      	        ResultSet crs = cpst.executeQuery();
+      	        while(true){
+      	        	if(crs.next()){ //Load comments
+      	        		out.println("<tr class=\"d-flex\">");
+      	        		out.println("<th scope=\"row\">"+crs.getString("userid")+"</th>");
+      	        		out.println("<td class=\"d-flex flex-grow-1\">"+crs.getString("content")+"</td>");
+      	        		if(crs.getString("userid").equals(userid))
+      	        			out.println("<td><button type=\"button\" class=\"btn btn-sm btn-outline-danger\" name=\"button\" onClick=\"location.href='deletecomment.jsp?cid="+crs.getString("cid")+"'\">Del</button></td>");
+      	        		out.println("</tr>");
+      	        	}
+      	        	else break;
+      	        }
+      	    } catch(Exception e){
+      	    	System.out.println(e);
+      	    }
+      	    %>
+      	    <!-- Comment input box -->
+            <tr class="d-flex">
+              <td class="d-flex flex-grow-1" colspan="3">
+                <form class="form-inline d-flex flex-grow-1" action="uploadcomment.jsp?prid=<%=prid%>" method="post">
+                  <textarea class="form-control d-flex flex-grow-1" name="user_comment" rows="2" cols="80" maxlength="255" placeholder="write comment" required></textarea>
+                  <button type="submit" class="btn btn-dark ml-3" name="button">Add</button>
+                </form>
+              </td>
+            </tr>
+      	  </tbody>
+      	</table>
+      </div>
     </div>
     <script>
     <%
+    //script for displaying left time in auction
     if(isAuction){
     	String due_datetime[] = due.split(" ");
     	String due_date[] = due_datetime[0].split("-");
     	String due_time[] = due_datetime[1].split(":");
     	due_date[1] = Integer.toString(Integer.parseInt(due_date[1]) - 1);
     	out.println("var timeleft = document.getElementById(\"timeleft\");");
-    	out.println("var bidbutton = document.getElementById(\"bid_btn\");");
+    	if(userclass.equals("buyer")) out.println("var bidbutton = document.getElementById(\"bid_btn\");");
+    	if(userclass.equals("seller")) out.println("var editbutton = document.getElementById(\"edit_btn\");");
+    	if(userclass.equals("seller")) out.println("var cancelbutton = document.getElementById(\"cancel_btn\");");
     	out.println("function clock(){");
     	out.println("var dueDate = new Date("+due_date[0]+","+due_date[1]+","+due_date[2]+","+due_time[0]+","+due_time[1]+","+due_time[2]+");");
     	out.println("var curDate = new Date();");
@@ -208,7 +270,9 @@ boolean isPurchased = false; //is purchased?
     	out.println("timeleft.innerText = left_hour + \":\" + left_min + \":\" + left_sec;");
     	out.println("} else {");
     	out.println("timeleft.innerText = \"Expired\";");
-    	out.println("bidbutton.disabled = true;");
+    	if(userclass.equals("buyer")) out.println("bidbutton.disabled = true;");
+    	if(userclass.equals("seller")) out.println("cancelbutton.disabled = true;");
+    	if(userclass.equals("seller")) out.println("editbutton.disabled = true;");
     	out.println("}");
     	out.println("}");
     	out.println("function update_clock() {");
@@ -220,6 +284,12 @@ boolean isPurchased = false; //is purchased?
     %>           
     </script>
   </div>
+  
+  <!-- footer -->
+  <footer class="page-footer font-smallpt-4">
+    <hr>
+    <div class="footer-copyright text-center pb-3"> &copy 2019 SKKU Web Programming Lab t10</div>
+  </footer>
   
   <!--Bootstrap js-->
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
