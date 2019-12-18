@@ -19,8 +19,8 @@
 
       <form class="" action="login.jsp" method="post">
         <label for="userid">USERID</label> <label for="password">PASSWORD</label> <br>
-        <input Id="userid" type="text" name="userid" value="">
-        <input type="password" name="password" value="">
+        <input Id="userid" type="text" name="userid" value="" maxlength="45">
+        <input type="password" name="password" value="" maxlength="45">
         <p style="color:red">
         <% try{
 			String userid=request.getParameter("userid");
