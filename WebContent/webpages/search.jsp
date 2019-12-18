@@ -97,6 +97,7 @@ if(max_price==null) max_price="";
         }
         else if(max_price!="") searchQuery = searchQuery + "and (price<="+Integer.parseInt(max_price)+")";
         
+        searchQuery = searchQuery + "order by prid desc";
         PreparedStatement pst = conn.prepareStatement(searchQuery);
         ResultSet rs = pst.executeQuery();
         

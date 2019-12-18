@@ -83,6 +83,9 @@ if(userclass == null || !userclass.equals("seller")){
             			ResultSet rs_2 = pst.executeQuery();
             			if(rs_2.next()){ // change product status to purchased
             				String maxBidder = rs_2.getString("userid");
+            				String maxPrice = rs_2.getString("price");
+            				pst = conn.prepareStatement("update product set price="+maxPrice+" where prid="+prid+"");
+            				pst.executeUpdate();
             				//new purchase info
             				pst = conn.prepareStatement("insert into purchase(userid, prid) values ('"+maxBidder+"',"+prid+")");
             				pst.executeUpdate();

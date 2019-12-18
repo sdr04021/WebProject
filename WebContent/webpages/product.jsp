@@ -78,6 +78,7 @@ boolean isExpired = false; //is expired? (auction)
   String due="";
   String bidName="";
   String maxBidder="";
+  String maxPrice="";
   try{
     Class.forName("com.mysql.cj.jdbc.Driver"); // MySQL database connection 
     Connection conn = DriverManager
@@ -107,6 +108,11 @@ boolean isExpired = false; //is expired? (auction)
 	rs = pst.executeQuery();
 	if(rs.next()){
 		maxBidder = rs.getString("userid");
+		maxPrice = rs.getString("price");
+		if(price!=maxPrice){
+			pst = conn.prepareStatement("update product set price="+maxPrice+" where prid="+prid+"");
+			pst.executeUpdate();
+		}
 	}
     
 	//check if buyer added this product in wish list
@@ -143,7 +149,7 @@ boolean isExpired = false; //is expired? (auction)
               %>
               <tr>
                 <th class="table-light"><%if(isAuction) out.println("Current Price"); else out.println("Price");%></th>
-                <td><%=price %>
+                <td><%if(isAuction&&(maxPrice!="")) out.println(""+maxPrice+""); else out.println(""+price+"");%>
                 <%
                 if(maxBidder!="") out.println("<span class=\"badge badge-dark\">"+maxBidder+"</span>");
                 %>
