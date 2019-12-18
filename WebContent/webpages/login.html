@@ -5,8 +5,29 @@
     <title>Flea market front</title>
     <link rel="stylesheet" href="../css/login.css">
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@beta/dist/js.cookie.min.js"></script>
+    <script>
+    function remember_me(){
+      var chk= $("chkbox");
+      if (chk.is(":checked")){
+          var userid=$("#userid").val();
+          var password=$("#password").val();
+          $.cookie("userid", userid, {expires : 3650 });
+          $.cookie("password", password, {expires :3650});
+          $.cookie("chk",chk, {expires :3650});
+      }
+    }
+    function memload(){
+      var userid=$.cookie("userid");
+      var password=$.cookie("password");
+      $("#userid").val(userid);
+      $("#password").val(password);
+      $("#chkbox").val(chk);
+    }
+    </script>
   </head>
-  <body>
+  <body onLoad="memload()">
     <br><br><br><br><br><br><br><br><br>
     <div class="Welcm">
       <h1>Welcome to the SKKU flea market!</h1>
@@ -16,10 +37,11 @@
 
       <form class="" action="login.jsp" method="post">
         <label for="id">USERID</label> <label for="pswd">PASSWORD</label> <br>
-        <input type="text" name="userid" value="">
-        <input type="password" name="password" value="">
+        <input type="text" id="userid" name="userid" value="">
+        <input type="password" id="password" name="password" value="">
         <br><br>
         <button type="submit" name="button">Sign in</button>
+        <p>Remember me <input type="checkbox" name="chkbox" value=""></p>
       </form>
       <p>new here? <a href="registration.html" style="color:skyblue">Sign up</a></p>
  
