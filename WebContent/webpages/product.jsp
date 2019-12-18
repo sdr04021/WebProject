@@ -223,7 +223,7 @@ boolean isExpired = false; //is expired? (auction)
       	        	if(crs.next()){ //Load comments
       	        		out.println("<tr class=\"d-flex\">");
       	        		out.println("<th scope=\"row\">"+crs.getString("userid")+"</th>");
-      	        		out.println("<td class=\"d-flex flex-grow-1\">"+crs.getString("content")+"</td>");
+      	        		out.println("<td class=\"d-flex flex-grow-1 text-break\">"+crs.getString("content")+"</td>");
       	        		if(crs.getString("userid").equals(userid))
       	        			out.println("<td><button type=\"button\" class=\"btn btn-sm btn-outline-danger\" name=\"button\" onClick=\"location.href='deletecomment.jsp?cid="+crs.getString("cid")+"'\">Del</button></td>");
       	        		out.println("</tr>");
